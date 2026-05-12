@@ -44,15 +44,18 @@ END;
 GO
 ```
 ## Step 2 — Schedule it every minute ##
-Option A: SQL Server Agent (if available)
-Open SQL Server Agent
-Create new job:
-Name: IoT_Data_Generator
-Add step:
-Type: T-SQL
-Command:
-EXEC InsertIoTBatch;
-Schedule: Recurring Every 1 minute
+Option A: SQL Server Agent (if available)<BR>
+Open SQL Server Agent<BR>
+Create new job:<BR>
+Name: IoT_Data_Generator<BR>
+On the Left, click on Steps and click New:<BR>
+Step Name: IoT <BR>
+Type: T-SQL<BR>
+Command: EXEC InsertIoTBatch;<BR>
+Click OK<BR>
+Go to Schedule and click New:<BR>
+Name: Create_Data<BR>
+Recurring Every 1 minute<BR>
 
 Step 3 — Done 🎉
 
