@@ -1,108 +1,5 @@
-
 USE ManufacturingDB;
 GO
-
-INSERT INTO Plants (PlantName, Location, PlantCode)
-VALUES
-('Midwest Components Plant', 'Cleveland, Ohio, USA', 'PLT-CLV'),
-('Gulf Coast Fabrication Plant', 'Houston, Texas, USA', 'PLT-HOU'),
-('Southeast Assembly Center', 'Greenville, South Carolina, USA', 'PLT-GVL');
-
-INSERT INTO Departments (PlantID, DepartmentName, DepartmentCode)
-VALUES
-(1, 'Production', 'PROD'),
-(1, 'Quality Control', 'QC'),
-(1, 'Maintenance', 'MNT'),
-(2, 'Production', 'PROD'),
-(2, 'Warehouse', 'WH');
-
-INSERT INTO Suppliers (SupplierName, ContactName, Phone, Email, City, Country, IsPreferred)
-VALUES
-('Arcelor Metals North America', 'Monica Reyes', '216-555-1001', 'mreyes@arcelor.com', 'Cleveland', 'USA', 1),
-('PolyChem Resins LLC', 'Nina Patel', '713-555-1003', 'npatel@polychem.com', 'Houston', 'USA', 1),
-('Great Lakes Fastener Co.', 'Brian OConnell', '313-555-1002', 'boconnell@glfastener.com', 'Detroit', 'USA', 1);
-
-INSERT INTO RawMaterials (MaterialCode, MaterialName, UnitOfMeasure, StandardCost, ReorderLevel)
-VALUES
-('RM-STEEL-1018', '1018 Carbon Steel Bar', 'KG', 2.85, 1800),
-('RM-AL-6061', '6061 Aluminum Billet', 'KG', 4.75, 900),
-('RM-RESIN-ABS', 'ABS Plastic Resin', 'KG', 2.10, 2200),
-('RM-BOLT-M8', 'M8 Zinc-Plated Hex Bolt', 'EA', 0.18, 15000);
-
-INSERT INTO Products (ProductCode, ProductName, ProductCategory, StandardCost, ListPrice, IsActive)
-VALUES
-('FG-PMP-100', 'Hydraulic Pump Assembly 100 Series', 'Fluid Power', 118.00, 189.00, 1),
-('FG-VAL-110', 'Industrial Control Valve 1.5in', 'Flow Control', 84.00, 139.00, 1),
-('FG-HSG-ABS', 'ABS Equipment Housing', 'Enclosures', 28.00, 54.00, 1);
-
-INSERT INTO Machines (PlantID, MachineCode, MachineName, MachineType, PurchaseDate, Status)
-VALUES
-(1, 'MC-CNC-01', 'CNC Cutter 01', 'CNC', '2020-01-15', 'Running'),
-(1, 'MC-ASM-01', 'Pump Assembly Line A', 'Assembly', '2021-02-10', 'Running'),
-(2, 'MC-INJ-01', 'ABS Injection Molder 01', 'Injection Molding', '2022-03-17', 'Running');
-
-INSERT INTO Employees (DepartmentID, FirstName, LastName, JobTitle, HireDate, Shift, Salary, Email, IsActive)
-VALUES
-(1, 'Daniel', 'Murphy', 'Production Supervisor', '2021-01-10', 'Day', 78000, 'daniel.murphy@factoryops.com', 1),
-(2, 'Olivia', 'Parker', 'Quality Engineer', '2020-05-14', 'Day', 76000, 'olivia.parker@factoryops.com', 1),
-(3, 'Corey', 'Sanders', 'Maintenance Technician', '2019-03-21', 'Night', 61000, 'corey.sanders@factoryops.com', 1);
-
-INSERT INTO MachineSensors (
-    MachineID,
-    SensorCode,
-    SensorName,
-    SensorType,
-    UnitOfMeasure,
-    MinAcceptableValue,
-    MaxAcceptableValue
-)
-VALUES
-(1, 'MC-CNC-01-TEMP-01', 'Bearing Temperature Sensor', 'Temperature', 'C', 15, 85),
-(1, 'MC-CNC-01-VIB-01', 'Main Spindle Vibration Sensor', 'Vibration', 'mm/s', 0, 12),
-(1, 'MC-CNC-01-RPM-01', 'Rotational Speed Sensor', 'RPM', 'RPM', 0, 5000),
-(2, 'MC-ASM-01-PWR-01', 'Power Consumption Meter', 'Power', 'kW', 0, 250),
-(3, 'MC-INJ-01-PRS-01', 'Hydraulic Pressure Sensor', 'Pressure', 'bar', 40, 210);
-
-INSERT INTO MachineSensorReadings (
-    SensorID,
-    MachineID,
-    ReadingTime,
-    ReadingValue,
-    Status,
-    QualityFlag
-)
-VALUES
-(1, 1, DATEADD(MINUTE, -5, SYSDATETIME()), 72.5, 'Normal', 'Good'),
-(2, 1, DATEADD(MINUTE, -4, SYSDATETIME()), 6.1, 'Normal', 'Good'),
-(3, 1, DATEADD(MINUTE, -3, SYSDATETIME()), 2450, 'Normal', 'Good'),
-(4, 2, DATEADD(MINUTE, -2, SYSDATETIME()), 118.4, 'Normal', 'Good'),
-(5, 3, DATEADD(MINUTE, -1, SYSDATETIME()), 156.8, 'Normal', 'Good');
-
-INSERT INTO MaintenanceLogs (
-    MachineID,
-    TechnicianID,
-    MaintenanceDate,
-    MaintenanceType,
-    Description,
-    DowntimeHours,
-    Cost
-)
-VALUES
-(1, 3, SYSDATETIME(), 'Preventive', 'Spindle alignment and lubrication.', 2.5, 450.00);
-
-INSERT INTO QualityInspections (
-    WorkOrderID,
-    InspectorID,
-    InspectionDate,
-    PassedQty,
-    FailedQty,
-    Notes
-)
-VALUES
-(1, 2, SYSDATETIME(), 95, 5, 'Minor dimensional variance detected.');
-GO
-
-
 
 SET NOCOUNT ON;
 GO
@@ -1111,4 +1008,72 @@ CROSS JOIN SensorCount sc
 JOIN SensorPool sp
     ON sp.SensorRowNum = ((n.n - 1) % NULLIF(sc.TotalSensors, 0)) + 1
 WHERE sc.TotalSensors > 0;
+GO
+
+------------------------------------------------------------
+-- 23) VIEW FOR POWER BI / FABRIC REPORTING
+------------------------------------------------------------
+CREATE OR ALTER VIEW dbo.vw_MachineSensorReadings AS
+SELECT
+    r.ReadingID,
+    r.ReadingTime,
+    r.ReadingValue,
+    r.Status,
+    r.QualityFlag,
+    s.SensorID,
+    s.SensorCode,
+    s.SensorName,
+    s.SensorType,
+    s.UnitOfMeasure,
+    m.MachineID,
+    m.MachineCode,
+    m.MachineName,
+    m.MachineType,
+    m.PlantID
+FROM dbo.MachineSensorReadings r
+JOIN dbo.MachineSensors s
+    ON r.SensorID = s.SensorID
+JOIN dbo.Machines m
+    ON r.MachineID = m.MachineID;
+GO
+
+------------------------------------------------------------
+-- 24) OPTIONAL STORED PROCEDURE: INSERT 5-10 IOT READINGS PER EXECUTION
+------------------------------------------------------------
+CREATE OR ALTER PROCEDURE dbo.InsertIoTBatch
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @RowCount INT = 5 + ABS(CHECKSUM(NEWID())) % 6;
+
+    INSERT INTO MachineSensorReadings (
+        SensorID,
+        MachineID,
+        ReadingTime,
+        ReadingValue,
+        Status,
+        QualityFlag
+    )
+    SELECT TOP (@RowCount)
+        s.SensorID,
+        s.MachineID,
+        SYSDATETIME(),
+        CAST(
+            CASE s.SensorType
+                WHEN 'Temperature' THEN 50 + (ABS(CHECKSUM(NEWID())) % 3000) / 100.0
+                WHEN 'Vibration'   THEN 2 + (ABS(CHECKSUM(NEWID())) % 500) / 100.0
+                WHEN 'Pressure'    THEN 100 + (ABS(CHECKSUM(NEWID())) % 8000) / 100.0
+                WHEN 'Power'       THEN 30 + (ABS(CHECKSUM(NEWID())) % 10000) / 100.0
+                WHEN 'RPM'         THEN 1000 + (ABS(CHECKSUM(NEWID())) % 2000)
+                WHEN 'OilLevel'    THEN 55 + (ABS(CHECKSUM(NEWID())) % 3500) / 100.0
+                ELSE 10
+            END AS DECIMAL(18,4)
+        ),
+        'Normal',
+        'Good'
+    FROM MachineSensors s
+    WHERE s.IsActive = 1
+    ORDER BY NEWID();
+END;
 GO
