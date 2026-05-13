@@ -2,7 +2,7 @@
 
 ```
 WITH RandomCritical AS (
-    SELECT TOP (200) r.ReadingID
+    SELECT TOP (500) r.ReadingID
     FROM MachineSensorReadings r
     ORDER BY NEWID()
 )
