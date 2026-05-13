@@ -45,7 +45,7 @@ GO
 ```
 ## Step 2 — Schedule it every minute ##
 ### Option A: ### 
-SQL Server Agent (if available)<BR>
+SQL Server Agent - via SSMS UI<BR>
 Open SQL Server Agent<BR>
 Create new job:<BR>
 Name: IoT_Data_Generator<BR>
