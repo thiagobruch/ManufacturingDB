@@ -124,7 +124,7 @@ EXEC msdb.dbo.sp_update_job
     @enabled = 0;
 ```
 
-## To delete it the Job and Drop the Store Procedure ##
+## To delete the Job and Drop the Store Procedure ##
 ```
 EXEC msdb.dbo.sp_delete_job
     @job_name = N'IoT_Data_Generator';
